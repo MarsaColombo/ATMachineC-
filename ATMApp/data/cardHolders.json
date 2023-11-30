@@ -1,0 +1,66 @@
+[
+    {
+      "cardNum": "1234567890123456",
+      "pin": 1234,
+      "firstName": "John",
+      "lastName": "Doe",
+      "balance": 100.00
+    },
+    {
+      "cardNum": "9876543210987654",
+      "pin": 4321,
+      "firstName": "Jane",
+      "lastName": "Doe",
+      "balance": 50.00
+    },
+    {
+      "cardNum": "1111222233334444",
+      "pin": 5678,
+      "firstName": "Alice",
+      "lastName": "Smith",
+      "balance": 75.00
+    },
+    {
+      "cardNum": "5555666677778888",
+      "pin": 8765,
+      "firstName": "Bob",
+      "lastName": "Johnson",
+      "balance": 120.00
+    },
+    {
+      "cardNum": "9999888877776666",
+      "pin": 2468,
+      "firstName": "Eve",
+      "lastName": "Jones",
+      "balance": 200.00
+    },
+    {
+      "cardNum": "4444333322221111",
+      "pin": 1357,
+      "firstName": "Charlie",
+      "lastName": "Brown",
+      "balance": 80.00
+    },
+    {
+      "cardNum": "7777666655554444",
+      "pin": 9876,
+      "firstName": "Grace",
+      "lastName": "Miller",
+      "balance": 150.00
+    },
+    {
+      "cardNum": "2222111133334444",
+      "pin": 7890,
+      "firstName": "David",
+      "lastName": "Johnson",
+      "balance": 90.00
+    },
+    {
+      "cardNum": "8888777766665555",
+      "pin": 5432,
+      "firstName": "Sophie",
+      "lastName": "Williams",
+      "balance": 180.00
+    }
+  ]
+  
