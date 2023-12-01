@@ -1,155 +1,131 @@
-﻿
-using System.Text.Json;
+﻿using System;
+using System.Collections.Generic;
 
-public class CardHolder
+class Program
 {
-    public string CardNum { get; set; }
-    public int Pin { get; set; }
-    public string FirstName { get; set; }
-    public string LastName { get; set; }
-    public double Balance { get; set; }
-
-    // Constructor with parameters
-    public CardHolder(string cardNum, int pin, string firstName, string lastName, double balance)
+    static void Main(string[] args)
     {
-        CardNum = cardNum;
-        Pin = pin;
-        FirstName = firstName;
-        LastName = lastName;
-        Balance = balance;
-    }
-
-    // Remaining methods remain unchanged
-    public string GetNum() { return CardNum; }
-    public int GetPin() { return Pin; }
-    public string GetFirstName() { return FirstName; }
-    public string GetLastName() { return LastName; }
-    public double GetBalance() { return Balance; }
-
-    public void SetNum(string newCardNum) { CardNum = newCardNum; }
-    public void SetPin(int newPin) { Pin = newPin; }
-    public void SetFirstName(string newFirstName) { FirstName = newFirstName; }
-    public void SetLastName(string newLastName) { LastName = newLastName; }
-    public void SetBalance(double newBalance) { Balance = newBalance; }
-
-    public static void Main(string[] args)
-    {
-        // Options menu and other methods remain unchanged
-
-        // List of cardHolders
         string jsonFile = "./data/cardHolders.json";
-        List<CardHolder> cardHolders = LoadFromJson(jsonFile);
+        CardHolderManager cardHolderManager = new CardHolderManager();
+        List<CardHolder> cardHolders = cardHolderManager.LoadFromJson(jsonFile);
+
         Console.WriteLine("CardHolders loaded: " + cardHolders.Count);
 
-        // Prompt User
         Console.WriteLine("Welcome to the ATM!");
 
-        // Card Number
+        // Example of exporting the cardHolders list
+        cardHolderManager.ExportToJson(cardHolders, "./data/exportedCardHolders.json");
+
         Console.WriteLine("Please enter your card number:");
-        string debitCardNum = "";
+        string? debitCardNum = "";
 
-        CardHolder currentUser = null;
+        CardHolder? currentUser = null;
 
-        while (true)
+        while (currentUser == null)
         {
-            try
+            debitCardNum = Console.ReadLine()?.Trim();
+
+            currentUser = cardHolders.Find(cardHolder => cardHolder.CardNum == debitCardNum);
+
+            if (currentUser == null)
             {
-                debitCardNum = Console.ReadLine()?.Trim(); // Trim to remove leading/trailing whitespaces
-
-                // Check against our debitCardNum (case-insensitive)
-                currentUser = cardHolders.FirstOrDefault(x => x.CardNum.Equals(debitCardNum, StringComparison.OrdinalIgnoreCase));
-
-                if (currentUser != null)
-                {
-                    break;
-                }
-                else
-                {
-                    Console.WriteLine($"Card not recognized! Entered card number: {debitCardNum}");
-                    Console.WriteLine("Available card numbers:");
-                    foreach (var cardHolder in cardHolders)
-                    {
-                        Console.WriteLine(cardHolder.CardNum);
-                    }
-
-                    // Add a check for null currentUser
-                    if (currentUser == null)
-                    {
-                        Console.WriteLine("Debug: currentUser is null.");
-                        break;  // Exit the loop if currentUser is null
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-                Console.WriteLine("Please enter a valid card number");
+                Console.WriteLine($"Card not recognized! Entered card number: {debitCardNum}");
+                Console.WriteLine("Debug: currentUser is null.");
             }
         }
 
-        // Pin
         Console.WriteLine("Please enter your pin:");
         int userPin = 0;
         while (true)
         {
-            try
+            if (!int.TryParse(Console.ReadLine(), out userPin))
             {
-                if (!int.TryParse(Console.ReadLine(), out userPin))
-                {
-                    Console.WriteLine("Invalid pin! Please enter a valid pin.");
-                    continue;
-                }
+                Console.WriteLine("Invalid pin! Please enter a valid pin.");
+                continue;
+            }
 
-                // Check against our db
-                if (currentUser.Pin == userPin)
-                {
+            if (currentUser.Pin == userPin)
+            {
+                break;
+            }
+            else
+            {
+                Console.WriteLine("Incorrect pin! Please try again");
+            }
+        }
+
+        Console.WriteLine($"Welcome, {currentUser.FirstName} {currentUser.LastName}!");
+
+        // ATM system
+        while (true)
+        {
+            Console.WriteLine("1. Check Balance");
+            Console.WriteLine("2. Withdraw Money");
+            Console.WriteLine("3. Add Money");
+            Console.WriteLine("4. Exit");
+            Console.Write("Please select an option: ");
+
+            if (!int.TryParse(Console.ReadLine(), out int option))
+            {
+                Console.WriteLine("Invalid option. Please try again.");
+                continue;
+            }
+
+            switch (option)
+            {
+                case 1:
+                    Console.WriteLine($"Your current balance is: {currentUser.Balance:C}");
                     break;
-                }
-                else
-                {
-                    Console.WriteLine("Incorrect pin! Please try again");
-                }
+
+                case 2:
+                    Console.Write("Enter the amount to withdraw: ");
+                    if (decimal.TryParse(Console.ReadLine(), out decimal withdrawalAmount))
+                    {
+                        if (withdrawalAmount > 0 && withdrawalAmount <= currentUser.Balance)
+                        {
+                            currentUser.Balance -= withdrawalAmount;
+                            Console.WriteLine($"Successfully withdrew {withdrawalAmount:C}. Remaining balance: {currentUser.Balance:C}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid amount or insufficient funds. Please try again.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid amount. Please enter a valid number.");
+                    }
+                    break;
+
+                case 3:
+                    Console.Write("Enter the amount to add: ");
+                    if (decimal.TryParse(Console.ReadLine(), out decimal depositAmount))
+                    {
+                        if (depositAmount > 0)
+                        {
+                            currentUser.Balance += depositAmount;
+                            Console.WriteLine($"Successfully added {depositAmount:C}. New balance: {currentUser.Balance:C}");
+                        }
+                        else
+                        {
+                            Console.WriteLine("Invalid amount. Please enter a positive number.");
+                        }
+                    }
+                    else
+                    {
+                        Console.WriteLine("Invalid amount. Please enter a valid number.");
+                    }
+                    break;
+
+                case 4:
+                    Console.WriteLine("Thank you! Goodbye");
+                    Environment.Exit(0);
+                    break;
+
+                default:
+                    Console.WriteLine("Invalid option. Please try again.");
+                    break;
             }
-            catch
-            {
-                Console.WriteLine("Please enter a valid pin");
-            }
         }
-
-        // Rest of your program remains unchanged
-
-        Console.WriteLine("Thank you! Goodbye");
     }
-
-static List<CardHolder> LoadFromJson(string jsonFilePath)
-{
-    try
-    {
-        if (!File.Exists(jsonFilePath))
-        {
-            throw new FileNotFoundException("Json file not found.", jsonFilePath);
-        }
-
-        string jsonString = File.ReadAllText(jsonFilePath);
-
-        if (string.IsNullOrWhiteSpace(jsonString))
-        {
-            throw new InvalidOperationException("Json file is empty or contains invalid data.");
-        }
-
-        List<CardHolder> cardHolders = JsonSerializer.Deserialize<List<CardHolder>>(jsonString);
-
-        return cardHolders;
-    }
-    catch (FileNotFoundException ex)
-    {
-        Console.WriteLine($"Error: {ex.Message}");
-        return new List<CardHolder>();
-    }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Error loading from JSON: {ex.Message}");
-        return new List<CardHolder>();
-    }
-}
 }
